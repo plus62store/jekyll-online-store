@@ -1,0 +1,22 @@
+<section class="border-b border-zinc-800 bg-zinc-950 py-12 px-4 mb-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center gap-2 text-zinc-500 font-mono text-xs uppercase tracking-widest mb-2"><span>// URBAN STREETWEAR ESSENTIALS</span><span>•</span><span class="text-emerald-400 flex items-center gap-1"><ion-icon name="location-outline"></ion-icon> TASIKMALAYA</span></div>
+    <h1 class="font-display text-4xl sm:text-6xl font-extrabold uppercase tracking-tight text-white mb-4">LIMITED <span class="underline decoration-zinc-700 underline-offset-8">DROPS</span> +62</h1>
+    <p class="text-zinc-400 max-w-xl text-sm sm:text-base leading-relaxed mb-4">Koleksi eksklusif distro streetwear dengan material kualitas ekspor, desain flat kontemporer, & potongan oversized fit modern.</p>
+    <div class="flex flex-wrap gap-3 text-xs font-mono">
+      <a href="https://wa.me/6281111191209" target="_blank" class="border border-zinc-800 hover:border-emerald-500 px-3.5 py-2 text-emerald-400 flex items-center gap-1.5"><ion-icon name="logo-whatsapp"></ion-icon> WhatsApp</a>
+      <a href="https://maps.app.goo.gl/sTWRVRh8Hp62doHw7?g_st=ac" target="_blank" class="border border-zinc-800 hover:border-zinc-500 px-3.5 py-2 text-zinc-300 flex items-center gap-1.5"><ion-icon name="map-outline"></ion-icon> Lokasi Toko (Google Maps)</a>
+    </div>
+  </div>
+</section>
+
+<div class="max-w-7xl mx-auto px-4 mb-8">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="relative flex-1 max-w-md"><ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-lg"></ion-icon><input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari artikel streetwear..." class="w-full bg-zinc-900 border border-zinc-800 rounded-none pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white transition-colors"></div>
+    <div id="filterContainer" class="flex gap-2 overflow-x-auto no-scrollbar py-1"><button onclick="filterByStyle('ALL')" class="btn-filter-active">Semua Artikel</button></div>
+  </div>
+</div>
+
+<div id="loadingState" class="flex flex-col items-center justify-center py-20"><ion-spinner name="crescent" color="light"></ion-spinner><p class="text-zinc-500 text-xs font-mono tracking-widest mt-4">MEMUAT KATALOG...</p></div>
+<div id="errorState" class="hidden text-center py-20 px-4"><ion-icon name="alert-circle-outline" class="text-4xl text-red-500 mb-2"></ion-icon><h3 class="font-display font-bold text-lg">Gagal Memuat Produk</h3><p class="text-zinc-500 text-xs mt-1 mb-4">Pastikan koneksi internet kamu lancar.</p><button onclick="fetchProducts()" class="btn-filter-active">Coba Lagi</button></div>
+<div class="max-w-7xl mx-auto px-4"><div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6"></div></div>

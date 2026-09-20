@@ -1,0 +1,264 @@
+---
+layout: null
+title: "+62 STORE / Admin"
+---
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>+62 STORE / Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { font-family: Inter, sans-serif; color-scheme: dark; }
+    body { background: #09090b; color: #f4f4f5; }
+    .display { font-family: 'Space Grotesk', sans-serif; }
+    input { outline: none; }
+    input:focus { border-color: #fbbf24; }
+    #globalDialog[hidden] { display: none; }
+    #globalDialog { background: rgba(9, 9, 11, .78); }
+    .dialog-panel { animation: dialog-in .18s ease-out; }
+    @keyframes dialog-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @media (max-width: 640px) {
+      body { overflow-x: hidden; }
+      #dashboard { padding-left: .75rem; padding-right: .75rem; }
+      #dashboard, #dashboard section, #productsList, #productsList > div { min-width: 0; max-width: 100%; }
+      #dashboard > div:first-of-type { align-items: stretch; }
+      #dashboard > div:first-of-type button { width: 100%; }
+      #dashboard section { padding: 1rem; }
+      #dashboard section > div:first-child { align-items: stretch; }
+      #dashboard section > div:first-child > div:last-child { flex-wrap: wrap; }
+      #dashboard section > div:first-child > div:last-child > button { flex: 1 1 100%; }
+      #productsList > div.grid { display: block !important; width: 100%; }
+      #productsList > div > label { display: block; width: 100%; margin-bottom: .75rem; }
+      #productsList > div > label input { width: 100%; min-width: 0; }
+      #productsList > div.grid > div.flex { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .5rem; width: 100%; min-width: 0; }
+      #productsList > div > div > label { min-width: 0; }
+      #productsList > div > div > label input { width: 100%; min-width: 0; }
+      #productsList [data-product-save], #productsList [data-product-remove] { width: 100%; margin-top: 0; }
+      #productsList [data-variant-row] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+      #productsList [data-variant-row] label:nth-of-type(3), #productsList [data-variant-row] label:nth-of-type(4) { grid-column: span 2; }
+      #productsList [data-variant-row] button { grid-column: span 2; width: 100%; }
+      #productsList [data-product-save], #productsList [data-product-remove] { min-width: 0; }
+      #adsList > div { grid-template-columns: 1fr; }
+      #adsList > div img { width: 100%; height: 9rem; }
+      #adsList > div button { justify-self: start; }
+      #globalDialog { padding: .75rem; }
+      .dialog-panel { max-height: calc(100dvh - 1.5rem); overflow-y: auto; }
+    }
+    @media (min-width: 641px) and (max-width: 1023px) {
+      #productsList > div > div {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+        align-items: end;
+        gap: .75rem;
+      }
+      #productsList > div > div > label { min-width: 0; }
+      #productsList > div > div > label input { width: 100%; min-width: 0; }
+      #productsList [data-product-save], #productsList [data-product-remove] {
+        margin-top: 0;
+        align-self: end;
+        white-space: nowrap;
+      }
+      #productsList [data-variant-row] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+      #productsList [data-variant-row] label:nth-of-type(3), #productsList [data-variant-row] label:nth-of-type(4) { grid-column: span 2; }
+      #productsList [data-variant-row] button { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+  <main class="min-h-screen">
+    {% include admin-header.html %}
+
+    {% include admin-login.html %}
+
+    <section id="dashboard" class="mx-auto hidden max-w-7xl px-4 py-8 sm:px-8">
+      <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p class="font-mono text-xs uppercase tracking-widest text-emerald-400">// LIVE OPERATIONS</p>
+          <h1 class="display mt-2 text-3xl font-bold sm:text-4xl">Store dashboard</h1>
+        </div>
+        <button id="refreshButton" class="border border-zinc-700 px-4 py-2 text-xs text-zinc-300 hover:border-white hover:text-white">Refresh data</button>
+      </div>
+
+      <div id="statsGrid" class="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"></div>
+
+      {% include admin-settings.html %}
+
+      {% include admin-products.html %}
+
+      <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        {% include admin-campaign.html %}
+        {% include admin-system.html %}
+      </div>
+    </section>
+  </main>
+
+  {% include admin-dialog.html %}
+
+  <script>
+    const BACKEND_URL = 'https://plus62ai.warpzone.workers.dev';
+    const APP_CORE = 'https://app-core.warpzone.workers.dev';
+    let adminToken = localStorage.getItem('plus62_admin_token') || '';
+    let ads = [];
+    let products = [];
+    let storeSettings = {};
+    let openProductIndex = -1;
+
+    const $ = (selector) => document.querySelector(selector);
+    const headers = () => ({ Authorization: `Bearer ${adminToken}` });
+    let dialogResolve = null;
+
+    function closeDialog(result = false) {
+      $('#globalDialog').hidden = true;
+      if (dialogResolve) {
+        const resolve = dialogResolve;
+        dialogResolve = null;
+        resolve(result);
+      }
+    }
+
+    function openDialog({ title, message, eyebrow = '// CONFIRM ACTION', confirmLabel = 'Lanjutkan', destructive = false, alertOnly = false }) {
+      $('#dialogEyebrow').textContent = eyebrow;
+      $('#dialogTitle').textContent = title;
+      $('#dialogMessage').textContent = message;
+      $('#dialogConfirm').textContent = confirmLabel;
+      $('#dialogConfirm').className = destructive ? 'bg-red-500 px-4 py-2 text-xs font-bold text-white hover:bg-red-400' : 'bg-amber-400 px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-amber-300';
+      $('#dialogCancel').hidden = alertOnly;
+      $('#dialogConfirm').textContent = alertOnly ? 'Tutup' : confirmLabel;
+      $('#globalDialog').hidden = false;
+      $('#dialogConfirm').focus();
+      if (alertOnly) return Promise.resolve(true);
+      return new Promise((resolve) => { dialogResolve = resolve; });
+    }
+
+    function showAlert(message, title = 'Info', destructive = false) {
+      return openDialog({ title, message, eyebrow: destructive ? '// ERROR' : '// SYSTEM MESSAGE', alertOnly: true, confirmLabel: 'Tutup', destructive });
+    }
+
+    function confirmAction(message, title = 'Konfirmasi') {
+      return openDialog({ title, message, confirmLabel: 'Ya, lanjutkan' });
+    }
+
+    $('#dialogClose').addEventListener('click', () => closeDialog(false));
+    $('#dialogCancel').addEventListener('click', () => closeDialog(false));
+    $('#dialogConfirm').addEventListener('click', () => closeDialog(true));
+    $('#globalDialog').addEventListener('click', (event) => { if (event.target.id === 'globalDialog') closeDialog(false); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('#globalDialog').hidden) closeDialog(false); });
+
+    function showDashboard() {
+      $('#loginPanel').classList.add('hidden');
+      $('#dashboard').classList.remove('hidden');
+      $('#logoutButton').classList.remove('hidden');
+      loadDashboard();
+    }
+
+    async function request(url, options = {}) {
+      const response = await fetch(url, { ...options, headers: { ...headers(), ...(options.headers || {}) } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `Request gagal (${response.status})`);
+      return data;
+    }
+
+    function renderStats(health, catalog) {
+      const cards = [
+        ['Backend', health.status === 'ok' ? 'ONLINE' : 'CHECK', health.status === 'ok' ? 'text-emerald-400' : 'text-red-400'],
+        ['Produk aktif', catalog.available ?? '-', 'text-white'],
+        ['Sold out', catalog.soldOut ?? '-', 'text-red-400'],
+        ['AI / TTS', `${health.ai ? 'AI' : '-'} · ${health.elevenlabs ? 'TTS' : '-'}`, 'text-amber-300'],
+      ];
+      $('#statsGrid').innerHTML = cards.map(([label, value, color]) => `<div class="border border-zinc-800 bg-zinc-900/40 p-4"><p class="font-mono text-[10px] uppercase tracking-widest text-zinc-500">${label}</p><p class="display mt-3 text-2xl font-bold ${color}">${value}</p></div>`).join('');
+    }
+
+    function renderSettings() {
+      $('#settingStoreName').value = storeSettings.storeName || '';
+      $('#settingAddress').value = storeSettings.address || '';
+      $('#settingMapsUrl').value = storeSettings.mapsUrl || '';
+      $('#settingWhatsapp').value = storeSettings.whatsapp || '';
+      $('#settingEmail').value = storeSettings.email || '';
+      $('#settingOperatingHours').value = storeSettings.operatingHours || '';
+    }
+
+    function renderAds() {
+      $('#adsList').innerHTML = ads.length ? ads.map((ad, index) => `<div class="grid gap-3 border border-zinc-800 bg-zinc-950 p-3 sm:grid-cols-[72px_1fr_auto] sm:items-center"><img src="${ad.image}" alt="" class="h-16 w-full object-cover sm:w-[72px]"><div class="grid gap-2"><input data-field="title" data-index="${index}" value="${escapeHtml(ad.title)}" class="border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="Judul promo"><input data-field="image" data-index="${index}" value="${escapeHtml(ad.image)}" class="border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="URL gambar"><input data-field="link" data-index="${index}" value="${escapeHtml(ad.link)}" class="border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="URL tujuan"></div><button data-remove="${index}" class="self-start px-2 py-2 text-xs text-red-400 hover:text-red-300">Hapus</button></div>`).join('') : '<p class="border border-dashed border-zinc-700 p-6 text-center text-sm text-zinc-500">Belum ada campaign.</p>';
+      $('#intervalInput').value = $('#intervalInput').value || 20;
+    }
+
+    function renderProducts() {
+      $('#productsList').innerHTML = products.length ? products.map((product, index) => {
+        const variants = Array.isArray(product.variants) ? product.variants : [];
+        const variantRows = variants.map((variant, variantIndex) => `<div class="grid grid-cols-[1fr_1fr_80px_1fr_auto] gap-2 items-end" data-variant-row="${variantIndex}"><label class="text-[9px] uppercase text-zinc-500">Warna<input data-variant-field="style" data-index="${index}" data-variant-index="${variantIndex}" value="${escapeHtml(variant.style)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-2 py-2 text-xs"></label><label class="text-[9px] uppercase text-zinc-500">Ukuran<input data-variant-field="size" data-index="${index}" data-variant-index="${variantIndex}" value="${escapeHtml(variant.size)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-2 py-2 text-xs"></label><label class="text-[9px] uppercase text-zinc-500">Stok<input data-variant-field="stock" data-index="${index}" data-variant-index="${variantIndex}" value="${escapeHtml(variant.stock)}" type="number" min="0" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-2 py-2 text-xs"></label><label class="text-[9px] uppercase text-zinc-500">URL gambar<input data-variant-field="image" data-index="${index}" data-variant-index="${variantIndex}" value="${escapeHtml(variant.image)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-2 py-2 text-xs"></label><button data-variant-remove="${index}" data-variant-index="${variantIndex}" class="mb-0 border border-red-500 px-2 py-2 text-xs text-red-300">×</button></div>`).join('');
+        const isOpen = openProductIndex === index;
+        return `<article class="product-accordion border border-zinc-800 bg-zinc-950" data-product-card="${index}"><button type="button" data-product-toggle="${index}" aria-expanded="${isOpen}" class="flex w-full items-center justify-between gap-3 p-3 text-left hover:bg-zinc-900"><span class="min-w-0"><strong class="block truncate text-sm text-white">${escapeHtml(product.title || 'Produk baru')}</strong><span class="mt-1 block font-mono text-[10px] uppercase text-zinc-500">${escapeHtml(product.slug || 'slug belum diisi')} · ${variants.length} varian · stok ${escapeHtml(product.stock ?? 0)}</span></span><span class="accordion-icon shrink-0 border border-zinc-700 px-2 py-1 text-xs text-zinc-400">${isOpen ? '−' : '+'}</span></button><div data-product-panel="${index}" ${isOpen ? '' : 'hidden'} class="border-t border-zinc-800 p-3"><div class="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end"><label class="text-[10px] uppercase text-zinc-500">Produk<input data-product-field="title" data-index="${index}" value="${escapeHtml(product.title)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="Nama produk"></label><label class="text-[10px] uppercase text-zinc-500">Slug<input data-product-field="slug" data-index="${index}" value="${escapeHtml(product.slug)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="slug-produk"></label><label class="text-[10px] uppercase text-zinc-500">URL gambar<input data-product-field="image" data-index="${index}" value="${escapeHtml(product.image)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="https://..."></label><div class="flex gap-2"><button data-product-save="${index}" class="bg-amber-400 px-3 py-2 text-xs font-bold text-zinc-950">Simpan</button><button data-product-remove="${index}" class="border border-red-500 px-3 py-2 text-xs text-red-300">Hapus</button></div></div><div class="mt-3 border-t border-zinc-800 pt-3"><div class="mb-2 flex items-center justify-between gap-2"><span class="font-mono text-[10px] uppercase tracking-wider text-zinc-500">Varian / stok per ukuran (total: ${escapeHtml(product.stock)})</span><button data-variant-add="${index}" class="shrink-0 border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 hover:border-amber-400 hover:text-amber-300">+ Varian</button></div><div class="space-y-2">${variantRows || '<p class="text-xs text-zinc-600">Belum ada varian. Tambahkan warna dan ukuran.</p>'}</div></div></div></article>`;
+      }).join('') : '<p class="border border-dashed border-zinc-700 p-6 text-center text-sm text-zinc-500">D1 belum berisi produk. Jalankan import katalog lama.</p>';
+    }
+
+    function renderProducts() {
+      $('#productsList').innerHTML = products.length ? products.map((product, index) => {
+        const variants = Array.isArray(product.variants) ? product.variants : [];
+        const groups = [];
+        const groupMap = new Map();
+        variants.forEach((variant, variantIndex) => {
+          const style = String(variant.style || 'Standard');
+          const key = style.toLowerCase();
+          if (!groupMap.has(key)) {
+            const group = { style, variants: [] };
+            groupMap.set(key, group);
+            groups.push(group);
+          }
+          groupMap.get(key).variants.push({ ...variant, variantIndex });
+        });
+        const groupsHtml = groups.map((group) => `<div class="border border-zinc-800 bg-zinc-950/60 p-3"><div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><label class="block flex-1 text-[9px] uppercase tracking-wider text-zinc-500">Warna / Style<input data-variant-group-style="${index}" data-variant-style-name="${escapeHtml(group.style)}" value="${escapeHtml(group.style)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-2 py-2 text-xs"></label><button data-variant-size-add="${index}" data-variant-style="${escapeHtml(group.style)}" class="border border-zinc-700 px-3 py-2 text-[10px] text-zinc-300 hover:border-amber-400 hover:text-amber-300">+ Ukuran</button></div><div class="space-y-2">${group.variants.map((variant) => `<div class="grid grid-cols-[1fr_80px_1fr_auto] gap-2 items-end" data-variant-row="${variant.variantIndex}"><label class="text-[9px] uppercase text-zinc-500">Ukuran<input data-variant-field="size" data-index="${index}" data-variant-index="${variant.variantIndex}" value="${escapeHtml(variant.size)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-2 py-2 text-xs"></label><label class="text-[9px] uppercase text-zinc-500">Stok<input data-variant-field="stock" data-index="${index}" data-variant-index="${variant.variantIndex}" value="${escapeHtml(variant.stock)}" type="number" min="0" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-2 py-2 text-xs"></label><label class="text-[9px] uppercase text-zinc-500">URL gambar<input data-variant-field="image" data-index="${index}" data-variant-index="${variant.variantIndex}" value="${escapeHtml(variant.image)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-2 py-2 text-xs"></label><button data-variant-remove="${index}" data-variant-index="${variant.variantIndex}" class="border border-red-500 px-2 py-2 text-xs text-red-300">×</button></div>`).join('')}</div></div>`).join('');
+        const isOpen = openProductIndex === index;
+        return `<article class="product-accordion border border-zinc-800 bg-zinc-950" data-product-card="${index}"><button type="button" data-product-toggle="${index}" aria-expanded="${isOpen}" class="flex w-full items-center justify-between gap-3 p-3 text-left hover:bg-zinc-900"><span class="min-w-0"><strong class="block truncate text-sm text-white">${escapeHtml(product.title || 'Produk baru')}</strong><span class="mt-1 block font-mono text-[10px] uppercase text-zinc-500">${escapeHtml(product.slug || 'slug belum diisi')} · ${groups.length} warna · ${variants.length} ukuran · stok ${escapeHtml(product.stock ?? 0)}</span></span><span class="accordion-icon shrink-0 border border-zinc-700 px-2 py-1 text-xs text-zinc-400">${isOpen ? '−' : '+'}</span></button><div data-product-panel="${index}" ${isOpen ? '' : 'hidden'} class="border-t border-zinc-800 p-3"><div class="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end"><label class="text-[10px] uppercase text-zinc-500">Produk<input data-product-field="title" data-index="${index}" value="${escapeHtml(product.title)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="Nama produk"></label><label class="text-[10px] uppercase text-zinc-500">Slug<input data-product-field="slug" data-index="${index}" value="${escapeHtml(product.slug)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="slug-produk"></label><label class="text-[10px] uppercase text-zinc-500">URL gambar<input data-product-field="image" data-index="${index}" value="${escapeHtml(product.image)}" class="mt-1 w-full border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs" placeholder="https://..."></label><div class="flex gap-2"><button data-product-save="${index}" class="bg-amber-400 px-3 py-2 text-xs font-bold text-zinc-950">Simpan</button><button data-product-remove="${index}" class="border border-red-500 px-3 py-2 text-xs text-red-300">Hapus</button></div></div><div class="mt-3 border-t border-zinc-800 pt-3"><div class="mb-2 flex items-center justify-between gap-2"><span class="font-mono text-[10px] uppercase tracking-wider text-zinc-500">Stok per warna dan ukuran</span><button data-variant-color-add="${index}" class="shrink-0 border border-amber-500 px-2 py-1 text-[10px] text-amber-300 hover:bg-amber-500 hover:text-zinc-950">+ Warna</button></div><div class="space-y-3">${groupsHtml || '<p class="text-xs text-zinc-600">Belum ada warna. Tambahkan warna pertama.</p>'}</div></div></div></article>`;
+      }).join('') : '<p class="border border-dashed border-zinc-700 p-6 text-center text-sm text-zinc-500">D1 belum berisi produk. Jalankan import katalog lama.</p>';
+    }
+
+    function escapeHtml(value) { return String(value || '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char])); }
+
+    async function loadDashboard() {
+      try {
+        const [health, catalog, campaign, productData, settings] = await Promise.all([request(`${BACKEND_URL}/api/admin/health`), request(`${BACKEND_URL}/api/admin/catalog`), request(`${APP_CORE}/admin/ads`), request(`${BACKEND_URL}/api/admin/products`), request(`${BACKEND_URL}/api/admin/settings`)]);
+        renderStats(health, catalog);
+        ads = campaign.ads || [];
+        products = productData.products || [];
+        storeSettings = settings;
+        $('#intervalInput').value = campaign.interval || 20;
+        renderAds();
+        renderProducts();
+        renderSettings();
+        $('#systemStatus').textContent = `Terakhir diperiksa ${new Date(health.checkedAt).toLocaleString('id-ID')}. Campaign aktif: ${ads.length}.`;
+      } catch (error) {
+        $('#systemStatus').textContent = error.message;
+        $('#systemStatus').className = 'mt-5 border-l-2 border-red-400 bg-zinc-950 p-4 text-sm text-red-300';
+      }
+    }
+
+    $('#loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      adminToken = $('#tokenInput').value.trim();
+      if (!adminToken) return;
+      localStorage.setItem('plus62_admin_token', adminToken);
+      try { await request(`${BACKEND_URL}/api/admin/health`); $('#loginError').classList.add('hidden'); showDashboard(); } catch (error) { $('#loginError').textContent = error.message; $('#loginError').classList.remove('hidden'); localStorage.removeItem('plus62_admin_token'); }
+    });
+
+    $('#refreshButton').addEventListener('click', loadDashboard);
+    $('#saveSettingsButton').addEventListener('click', async () => { const nextSettings = { storeName: $('#settingStoreName').value.trim(), address: $('#settingAddress').value.trim(), mapsUrl: $('#settingMapsUrl').value.trim(), whatsapp: $('#settingWhatsapp').value.trim(), email: $('#settingEmail').value.trim(), operatingHours: $('#settingOperatingHours').value.trim() }; if (Object.values(nextSettings).some((value) => !value)) return showAlert('Semua context toko wajib diisi.', 'Context belum lengkap', true); if (!await confirmAction('Simpan informasi toko ini sebagai context AI?', 'Simpan context AI')) return; $('#settingsStatus').textContent = 'Menyimpan...'; try { storeSettings = await request(`${BACKEND_URL}/api/admin/settings`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(nextSettings) }); renderSettings(); $('#settingsStatus').textContent = 'Context AI berhasil diperbarui.'; await showAlert('Context AI berhasil diperbarui.', 'Berhasil'); } catch (error) { $('#settingsStatus').textContent = error.message; await showAlert(error.message, 'Gagal menyimpan context', true); } });
+    $('#logoutButton').addEventListener('click', () => { localStorage.removeItem('plus62_admin_token'); location.reload(); });
+    $('#addAdButton').addEventListener('click', () => { ads.push({ title: 'Promo Baru', image: '', link: '' }); renderAds(); });
+    $('#adsList').addEventListener('input', (event) => { const index = event.target.dataset.index; const field = event.target.dataset.field; if (index !== undefined && field) ads[index][field] = event.target.value; });
+    $('#adsList').addEventListener('click', async (event) => { const index = event.target.dataset.remove; if (index !== undefined && await openDialog({ title: 'Hapus campaign', message: 'Hapus campaign banner ini dari daftar?', confirmLabel: 'Hapus', destructive: true })) { ads.splice(Number(index), 1); renderAds(); await showAlert('Campaign dihapus dari daftar sementara. Klik Simpan campaign untuk menerapkan perubahan.', 'Campaign dihapus'); } });
+    $('#saveAdsButton').addEventListener('click', async () => { if (!await confirmAction('Simpan seluruh perubahan campaign banner ke server?', 'Simpan campaign')) return; $('#adsStatus').textContent = 'Menyimpan...'; try { const saved = await request(`${APP_CORE}/admin/ads`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ads, interval: Number($('#intervalInput').value) || 20 }) }); ads = saved.ads; renderAds(); $('#adsStatus').textContent = 'Campaign berhasil disimpan.'; await showAlert('Campaign banner berhasil disimpan.', 'Berhasil'); } catch (error) { $('#adsStatus').textContent = error.message; await showAlert(error.message, 'Gagal menyimpan campaign', true); } });
+    $('#importProductsButton').addEventListener('click', async () => { if (!await confirmAction('Import katalog eksternal akan menambah atau memperbarui data produk di D1. Lanjutkan?', 'Import katalog')) return; $('#productsStatus').textContent = 'Mengimpor katalog...'; try { const result = await request(`${BACKEND_URL}/api/admin/products/import`, { method: 'POST' }); products = result.products || []; renderProducts(); $('#productsStatus').textContent = `${result.imported} produk berhasil diimpor ke D1.`; await showAlert(`${result.imported} produk berhasil diimpor ke D1.`, 'Import berhasil'); } catch (error) { $('#productsStatus').textContent = error.message; await showAlert(error.message, 'Import gagal', true); } });
+    $('#addProductButton').addEventListener('click', () => { products.unshift({ title: '', slug: '', image: '', price: 0, stock: 0, variants: [] }); openProductIndex = 0; renderProducts(); });
+    $('#productsList').addEventListener('click', (event) => { const toggle = event.target.closest('[data-product-toggle]'); if (!toggle) return; const selectedIndex = Number(toggle.dataset.productToggle); openProductIndex = openProductIndex === selectedIndex ? -1 : selectedIndex; document.querySelectorAll('#productsList [data-product-panel]').forEach((panel) => { const open = Number(panel.dataset.productPanel) === openProductIndex; panel.hidden = !open; const button = panel.closest('[data-product-card]')?.querySelector('[data-product-toggle]'); if (button) { button.setAttribute('aria-expanded', String(open)); const icon = button.querySelector('.accordion-icon'); if (icon) icon.textContent = open ? '−' : '+'; } }); });
+    $('#productsList').addEventListener('input', (event) => { const index = Number(event.target.dataset.index); const field = event.target.dataset.productField; const variantField = event.target.dataset.variantField; const variantIndex = Number(event.target.dataset.variantIndex); const groupStyleIndex = event.target.dataset.variantGroupStyle; const oldStyle = event.target.dataset.variantStyleName; if (field) products[index][field] = event.target.value; if (variantField && products[index]?.variants?.[variantIndex]) products[index].variants[variantIndex][variantField] = event.target.value; if (groupStyleIndex !== undefined) products[Number(groupStyleIndex)].variants.filter((variant) => String(variant.style || '').toLowerCase() === String(oldStyle).toLowerCase()).forEach((variant) => { variant.style = event.target.value; }); });
+    $('#productsList').addEventListener('click', async (event) => { const saveIndex = event.target.dataset.productSave; const removeIndex = event.target.dataset.productRemove; const variantAddIndex = event.target.dataset.variantAdd; const variantColorAddIndex = event.target.dataset.variantColorAdd; const variantSizeAddIndex = event.target.dataset.variantSizeAdd; const variantStyle = event.target.dataset.variantStyle; const variantRemoveIndex = event.target.dataset.variantRemove; const variantIndex = Number(event.target.dataset.variantIndex); try { if (variantColorAddIndex !== undefined) { openProductIndex = Number(variantColorAddIndex); products[Number(variantColorAddIndex)].variants = products[Number(variantColorAddIndex)].variants || []; products[Number(variantColorAddIndex)].variants.push({ style: 'Warna baru', size: 'M', stock: 0, image: products[Number(variantColorAddIndex)].image || '' }); renderProducts(); return; } if (variantSizeAddIndex !== undefined) { const product = products[Number(variantSizeAddIndex)]; const existing = product.variants || []; const sizes = ['S', 'M', 'L', 'XL', 'XXL']; const used = new Set(existing.filter((variant) => String(variant.style).toLowerCase() === String(variantStyle).toLowerCase()).map((variant) => String(variant.size).toUpperCase())); const nextSize = sizes.find((size) => !used.has(size)) || 'M'; openProductIndex = Number(variantSizeAddIndex); product.variants.push({ style: variantStyle, size: nextSize, stock: 0, image: existing.find((variant) => String(variant.style).toLowerCase() === String(variantStyle).toLowerCase())?.image || product.image || '' }); renderProducts(); return; } if (variantAddIndex !== undefined) { openProductIndex = Number(variantAddIndex); products[Number(variantAddIndex)].variants = products[Number(variantAddIndex)].variants || []; products[Number(variantAddIndex)].variants.push({ style: 'Standard', size: 'M', stock: 0, image: products[Number(variantAddIndex)].image || '' }); renderProducts(); return; } if (variantRemoveIndex !== undefined) { if (!await openDialog({ title: 'Hapus varian', message: 'Hapus kombinasi warna dan ukuran ini?', confirmLabel: 'Hapus', destructive: true })) return; openProductIndex = Number(variantRemoveIndex); products[Number(variantRemoveIndex)].variants.splice(variantIndex, 1); renderProducts(); return; } if (saveIndex !== undefined) { if (!await confirmAction('Simpan perubahan produk dan stok seluruh variannya ke database D1?', 'Simpan produk')) return; openProductIndex = Number(saveIndex); const product = products[Number(saveIndex)]; const method = product.id ? 'PUT' : 'POST'; const url = product.id ? `${BACKEND_URL}/api/admin/products/${encodeURIComponent(product.slug)}` : `${BACKEND_URL}/api/admin/products`; const saved = await request(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(product) }); products[Number(saveIndex)] = saved.product; renderProducts(); $('#productsStatus').textContent = 'Produk dan varian tersimpan di D1.'; await showAlert('Produk dan stok varian berhasil disimpan ke D1.', 'Berhasil'); } else if (removeIndex !== undefined) { const product = products[Number(removeIndex)]; if (!await openDialog({ title: 'Hapus produk', message: `Hapus ${product.title || 'produk ini'} dari katalog?`, confirmLabel: 'Hapus', destructive: true })) return; if (product.id) await request(`${BACKEND_URL}/api/admin/products/${encodeURIComponent(product.slug)}`, { method: 'DELETE' }); const deletedIndex = Number(removeIndex); products.splice(deletedIndex, 1); openProductIndex = openProductIndex === deletedIndex ? -1 : openProductIndex > deletedIndex ? openProductIndex - 1 : openProductIndex; renderProducts(); $('#productsStatus').textContent = 'Produk dihapus.'; await showAlert('Produk berhasil dihapus.', 'Berhasil'); } } catch (error) { $('#productsStatus').textContent = error.message; await showAlert(error.message, 'Aksi gagal', true); } });
+
+    if (adminToken) { $('#tokenInput').value = adminToken; showDashboard(); }
+  </script>
+</body>
+</html>

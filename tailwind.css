@@ -1,0 +1,350 @@
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #09090b;
+      color: #f4f4f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none !important;  /* IE and Edge */
+      scrollbar-width: none !important;  /* Firefox */
+    }
+
+    .product-card {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+    }
+    .product-card:active {
+      transform: scale(0.98);
+    }
+
+    #detailImg {
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    ion-modal {
+      --background: #09090b;
+      --border-color: #27272a;
+    }
+
+    ion-modal#productDetailModal {
+      --width: 100%;
+      --height: 100%;
+      --max-height: 100%;
+      --border-radius: 0px;
+      margin: auto;
+    }
+
+    .drawer-btn {
+      color: #d4d4d8 !important;
+      border: 1px solid #27272a !important;
+      padding: 13px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      white-space: nowrap !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      transition: all 0.2s ease !important;
+    }
+    .drawer-btn:hover {
+      color: #ffffff !important;
+      border-color: #52525b !important;
+    }
+
+    .voice-btn {
+      color: #d4d4d8 !important;
+      padding: 6px 12px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      display: none !important;
+      visibility: hidden !important;
+      align-items: center !important;
+      gap: 6px !important;
+      transition: all 0.2s ease !important;
+    }
+    .voice-btn:hover {
+      background-color: #3f3f46 !important;
+      color: #ffffff !important;
+    }
+    .voice-btn:disabled {
+      background-color: #27272a !important;
+      color: #71717a !important;
+      cursor: not-allowed !important;
+    }
+    .voice-btn:disabled:hover {
+      background-color: #27272a !important;
+      color: #71717a !important;
+    }
+    .voice-btn:active {
+      transform: scale(0.98) !important;
+    }
+
+    .btn-filter-active {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      border: 1px solid #ffffff !important;
+      padding: 8px 16px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      white-space: nowrap !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+    }
+
+    .btn-filter-inactive {
+      background-color: #18181b !important;
+      color: #a1a1aa !important;
+      border: 1px solid #27272a !important;
+      padding: 8px 16px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      white-space: nowrap !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      transition: all 0.2s ease !important;
+    }
+    .btn-filter-inactive:hover {
+      color: #ffffff !important;
+      border-color: #52525b !important;
+    }
+
+    .btn-size-active {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      border: 1px solid #ffffff !important;
+      padding: 8px 16px !important;
+      font-size: 12px !important;
+      font-family: monospace !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+    }
+
+    .btn-size-inactive {
+      background-color: transparent !important;
+      color: #d4d4d8 !important;
+      border: 1px solid #27272a !important;
+      padding: 8px 16px !important;
+      font-size: 12px !important;
+      font-family: monospace !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      transition: border-color 0.2s ease !important;
+    }
+    .btn-size-inactive:hover {
+      border-color: #71717a !important;
+    }
+
+    .btn-style-active {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      border: 1px solid #ffffff !important;
+      padding: 6px 14px !important;
+      font-size: 12px !important;
+      font-family: monospace !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+
+    .btn-style-inactive {
+      background-color: transparent !important;
+      color: #d4d4d8 !important;
+      border: 1px solid #27272a !important;
+      padding: 6px 14px !important;
+      font-size: 12px !important;
+      font-family: monospace !important;
+      text-transform: uppercase !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      transition: border-color 0.2s ease !important;
+    }
+    .btn-style-inactive:hover {
+      border-color: #52525b !important;
+    }
+
+    .btn-cart-qty {
+      background-color: transparent !important;
+      color: #a1a1aa !important;
+      padding: 4px 10px !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      border: none !important;
+    }
+    .btn-cart-qty:hover {
+      color: #ffffff !important;
+    }
+
+    .btn-primary-action {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      padding: 16px 24px !important;
+      font-weight: 700 !important;
+      font-size: 14px !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      border: none !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      width: 100% !important;
+      transition: background-color 0.2s ease !important;
+    }
+    .btn-primary-action:hover {
+      background-color: #e4e4e7 !important;
+    }
+
+    .btn-wa-checkout {
+      background-color: #10b981 !important;
+      color: #000000 !important;
+      padding: 16px 24px !important;
+      font-weight: 700 !important;
+      font-size: 14px !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      border: none !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      width: 100% !important;
+      transition: background-color 0.2s ease !important;
+    }
+    .btn-wa-checkout:hover {
+      background-color: #34d399 !important;
+    }
+
+    .ai-chip-btn {
+      background-color: #18181b !important;
+      color: #d4d4d8 !important;
+      border: 1px solid #27272a !important;
+      padding: 8px 14px !important;
+      font-size: 11px !important;
+      font-family: monospace !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      white-space: nowrap !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      transition: all 0.2s ease !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+    .ai-chip-btn:hover {
+      background-color: #27272a !important;
+      color: #ffffff !important;
+      border-color: #71717a !important;
+    }
+
+    .btn-mic-ai {
+      border: 1px solid #3f3f46 !important;
+      padding: 10px 14px !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: background-color 0.2s ease !important;
+    }
+    .btn-mic-ai:hover {
+      background-color: #3f3f46 !important;
+    }
+
+    .btn-ai-send {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      border: 1px solid #ffffff !important;
+      padding: 10px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: background-color 0.2s ease !important;
+    }
+    .btn-ai-send:hover {
+      background-color: #e4e4e7 !important;
+    }
+
+    .btn-cart {
+      background-color: #18181b !important;
+      color: #d4d4d8 !important;
+      border: 1px solid #27272a !important;
+      padding: 10px 14px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      border-radius: 0px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 6px !important;
+      transition: all 0.2s ease !important;
+    }
+    .btn-cart:hover {
+      background-color: #27272a !important;
+      color: #ffffff !important;
+      border-color: #71717a !important;
+    }
+    
+
+  .btn-primary-action:disabled,
+  .size-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #27272a !important;
+    border-color: #3f3f46 !important;
+    color: #71717a !important;
+  }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .voice-pulse {
+      animation: pulse-ring 1.5s infinite ease-in-out;
+    }
+
+    #aiDrawer {
+      height: 100dvh;
+      z-index: 10;
+    }
+    .ion-no-border {
+      --border-width: 0px;
+    }
+    ion-header.ion-no-border {
+      --background: #09090b;
+    z-index: 0!important;
+    }

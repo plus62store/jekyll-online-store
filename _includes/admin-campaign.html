@@ -1,0 +1,12 @@
+<section class="border border-zinc-800 bg-zinc-900/40 p-5">
+  <div class="mb-5 flex items-center justify-between">
+    <div><p class="font-mono text-xs uppercase text-zinc-500">Campaign inventory</p><h2 class="display mt-1 text-xl font-bold">Banner iklan</h2></div>
+    <button id="addAdButton" class="border border-amber-400 px-3 py-2 text-xs font-bold text-amber-300 hover:bg-amber-400 hover:text-zinc-950">+ Tambah</button>
+  </div>
+  <div id="adsList" class="space-y-3"></div>
+  <div class="mt-5 flex flex-col gap-3 border-t border-zinc-800 pt-5 sm:flex-row sm:items-end sm:justify-between">
+    <label class="text-xs text-zinc-400">Rotasi banner (detik)<input id="intervalInput" type="number" min="5" class="mt-1 block w-32 border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"></label>
+    <button id="saveAdsButton" class="bg-amber-400 px-4 py-3 text-xs font-bold text-zinc-950 hover:bg-amber-300">Simpan campaign</button>
+  </div>
+  <p id="adsStatus" class="mt-3 text-xs text-zinc-500"></p>
+</section>

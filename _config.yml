@@ -1,0 +1,14 @@
+title: "+62 STORE"
+description: "International streetwear distro dengan AI assistant"
+lang: id
+url: "https://daffadevhosting.github.io"
+baseurl: "/store"
+markdown: kramdown
+permalink: pretty
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor/
+  - README.md
+  - LICENSE
+  - .gitignore

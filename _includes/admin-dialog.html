@@ -1,0 +1,16 @@
+<div id="globalDialog" hidden class="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation">
+  <section class="dialog-panel w-full max-w-md border border-zinc-700 bg-zinc-950 p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <div class="mb-4 flex items-start justify-between gap-4">
+      <div>
+        <p id="dialogEyebrow" class="font-mono text-[10px] uppercase tracking-widest text-amber-400">// CONFIRM ACTION</p>
+        <h2 id="dialogTitle" class="display mt-1 text-xl font-bold">Konfirmasi</h2>
+      </div>
+      <button id="dialogClose" type="button" class="border border-zinc-800 px-2 py-1 text-zinc-400 hover:border-zinc-500 hover:text-white" aria-label="Tutup">&times;</button>
+    </div>
+    <p id="dialogMessage" class="text-sm leading-relaxed text-zinc-400"></p>
+    <div class="mt-6 flex justify-end gap-2">
+      <button id="dialogCancel" type="button" class="border border-zinc-700 px-4 py-2 text-xs text-zinc-300 hover:border-white hover:text-white">Batal</button>
+      <button id="dialogConfirm" type="button" class="bg-amber-400 px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-amber-300">Lanjutkan</button>
+    </div>
+  </section>
+</div>
