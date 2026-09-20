@@ -1,8 +1,8 @@
 title: "+62 STORE"
 description: "International streetwear distro dengan AI assistant"
 lang: id
-url: "https://daffadevhosting.github.io"
-baseurl: "/store"
+url: "https://plus62store-ai.vercel.app"
+baseurl: ""
 markdown: kramdown
 permalink: pretty
 exclude:
